@@ -14,9 +14,11 @@
 
 The **Abrams Event Address (AEA)** is a universal **4D spacetime coordinate standard** designed to anchor physical events across terrestrial, orbital, cislunar, and deep-space frameworks.
 
-In relativistic physics and the model of **block time (eternalism)**, events do not merely happen and vanish in isolation: they occupy fixed, permanent coordinates in the four-dimensional manifold of spacetime (where and when). While traditional navigation systems like GPS locate an object only on Earth's moving crust at the current second, AEA treats spacetime as an addressable namespace. It replaces fragmented civil conventions with deterministic 4D event indexing anchored to continuous atomic time and celestial reference frames.
+In relativistic physics and the model of **block time (eternalism)**, events do not merely happen and vanish in isolation: they occupy fixed, deterministic coordinates in the four-dimensional manifold of spacetime (where and when). While traditional navigation systems like GPS locate an object only on Earth's moving crust at the current second, AEA treats spacetime as an addressable namespace. It replaces fragmented civil conventions with deterministic 4D event indexing anchored to continuous atomic time and celestial reference frames.
 
-To serve real-world robotics and flight avionics, this 4D coordinate is implemented as **AEA-STATE/1**: a compact, 136-byte integrity-checked record. It binds the central body, the coordinate chart (ITRF2020, GCRS, BCRS), continuous atomic time (TAI), 3D kinematics, attitude, and a SHA-256 cryptographic seal into a single atomic object. It does not replace GPS or navigation filters: it is the zero-heap, bare-metal companion they emit so that when communication drops, every vehicle retains a permanent, verifiable record of where and when it existed in the physical cosmos.
+To serve real-world robotics and flight avionics, this 4D coordinate is implemented as **AEA-STATE/1**: a compact, 136-byte integrity-checked record. It binds the central body, the coordinate chart (ITRF2020, GCRS, BCRS), continuous atomic time (TAI), 3D kinematics, attitude, and a SHA-256 cryptographic seal into a single atomic object. It does not replace GPS or navigation filters: it is the zero-heap, bare-metal companion they emit so that when communication drops, every vehicle retains a deterministic, verifiable record of where and when it existed in the physical cosmos.
+
+> **Engineering Scope & Relativistic Realism Note:** AEA-STATE/1 is a coordinate tagging standard and cryptographic state sealer, not an active relativistic numerical integrator or general relativity solver. It tags kinematic state against declared reference frames (ITRF2020, GCRS, BCRS) and monotonic atomic clocks (TAI, TT, TDB) so that downstream trajectory filters can compute relativistic transformations without lost or ambiguous frame conventions. The 32-byte SHA-256 seal guarantees bit-level data integrity against corruption and single-event upsets; it verifies that the recorded telemetry is unchanged, rather than asserting absolute external truth.
 
 ---
 
@@ -55,7 +57,7 @@ python tools/aea.py verify tests/kat/cambridge.bin
 # Output: OK: SHA-256 integrity seal verified (9f6cc1096562729a902167fd622e66a264a239f3e9a9d804414659e3ab97800e).
 ```
 
-> **No Python installed?** Test this exact record live in your browser using the **[AEA Spacetime Inspector](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)**: decodes the kinematics, computes the Bowring WGS 84 geodesy inverse, and recalculates the SHA-256 seal client-side using the W3C WebCrypto API.
+> **No Python installed?** Test this exact record live in your browser using the **[AEA Record Inspector](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)**: decodes the kinematics, computes the Bowring WGS 84 geodesy inverse, and recalculates the SHA-256 seal client-side using the W3C WebCrypto API.
 
 ---
 
@@ -131,8 +133,8 @@ python tools/aea.py decode tests/kat/cambridge.bin
 python tools/aea.py json tests/kat/cambridge.bin
 ```
 
-### Option B: In-Browser Live Inspector & Physics Lab
-**[▶ Open Live Spacetime Inspector & Physics Lab](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)**: Interactive browser tool that decodes 4D coordinates, runs Bowring ellipsoid geodesy, visualizes the 136-byte memory wire map, and simulates cosmic-ray bit flips live via WebCrypto.
+### Option B: In-Browser Record Inspector
+**[▶ Open Live Record Inspector](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)**: Zero-dependency client-side tool that decodes 4D coordinates, performs Bowring ellipsoid geodesy, visualizes the 136-byte memory wire map, and simulates cosmic-ray bit flips live via WebCrypto.
 
 Auto-loads the canonical Cambridge 2009 record on start, provides one-click presets (Cambridge, Apollo 11, ISS), and allows inspecting custom `.bin` records with zero install. Runs 100% client-side via the W3C WebCrypto API with zero network calls.
 
