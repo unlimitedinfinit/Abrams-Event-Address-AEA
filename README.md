@@ -11,11 +11,11 @@
 
 ---
 
-The **Abrams Event Address (AEA)** is a deterministic 4D spacetime coordinate standard and a 136-byte integrity-checked record for physical events. Rooted in relativistic astrometry and cryptographic verification, AEA replaces ambiguous, isolated conventions with explicit 4D event indexing across terrestrial, cislunar, and interplanetary frames.
+The **Abrams Event Address (AEA)** is a universal **4D spacetime coordinate standard** designed to anchor physical events across terrestrial, orbital, cislunar, and deep-space frameworks.
 
-While conventional navigation outputs locate an object only on a local chart at a single civil second, physical events exist in 4D spacetime. AEA-STATE/1 binds the governing physics directly to the telemetry: declaring the central gravitating body (NAIF ID), the astrometric reference chart (ITRF2020, GCRS, BCRS), continuous atomic time (TAI, TT, TDB), Cartesian kinematics, attitude quaternion, and a 32-byte SHA-256 integrity digest over the canonical prefix.
+In relativistic physics and the model of **block time (eternalism)**, events do not merely happen and vanish in isolation: they occupy fixed, permanent coordinates in the four-dimensional manifold of spacetime (where and when). While traditional navigation systems like GPS locate an object only on Earth's moving crust at the current second, AEA treats spacetime as an addressable namespace. It replaces fragmented civil conventions with deterministic 4D event indexing anchored to continuous atomic time and celestial reference frames.
 
-In communication-denied multi-agent operations or multi-decade archival logs, two platforms often hold state numbers that cannot be correlated because implicit frame or clock conventions were lost. AEA-STATE/1 binds the tags directly to the data so a consumer never has to guess the chart or time scale. It does not replace GPS, ITRF, GCRS, ROS 2 odometry, or CCSDS OEM; it is the zero-heap, single-epoch binary companion they emit. It does not navigate or propagate trajectories; it ensures that once state is estimated, where and when that event occurred remains mathematically unambiguous, verifiable, and permanent.
+To serve real-world robotics and flight avionics, this 4D coordinate is implemented as **AEA-STATE/1**: a compact, 136-byte integrity-checked record. It binds the central body, the coordinate chart (ITRF2020, GCRS, BCRS), continuous atomic time (TAI), 3D kinematics, attitude, and a SHA-256 cryptographic seal into a single atomic object. It does not replace GPS or navigation filters: it is the zero-heap, bare-metal companion they emit so that when communication drops, every vehicle retains a permanent, verifiable record of where and when it existed in the physical cosmos.
 
 ---
 
@@ -32,7 +32,7 @@ AEA:399:TAI:1246190426.0:ITRF2020:3916909.5232774816,8057.749278632174,5016918.6
 
 Reading this canonical address from left to right translates directly into physical reality:
 
-> *"This event took place on Earth (`399`), timed on continuous atomic time (`TAI`) at timestamp `1,246,190,426.0` (corresponding to 2009-06-28 12:00:00 UTC under the ICD conversion rule). Position is measured in an Earth-fixed grid (`ITRF2020`) at Cartesian coordinates `[3916909.52m, 8057.75m, 5016918.65m]`—which converts on the WGS 84 ellipsoid to `52.205878° N, 0.117867° E` (Stephen Hawking's reception room in Cambridge, UK). Velocity is stationary relative to the chart (`0, 0, 0 m/s`), attitude is an identity quaternion (`0, 0, 0, 1`, unmeasured for this KAT), and the entire state is sealed with a cryptographic fingerprint (`9f6cc109...`) that fails verification if any bit of the prefix is corrupted."*
+> *"This event took place on Earth (`399`), timed on continuous atomic time (`TAI`) at timestamp `1,246,190,426.0` (corresponding to 2009-06-28 12:00:00 UTC under the ICD conversion rule). Position is measured in an Earth-fixed grid (`ITRF2020`) at Cartesian coordinates `[3916909.52m, 8057.75m, 5016918.65m]`: which converts on the WGS 84 ellipsoid to `52.205878° N, 0.117867° E` (Stephen Hawking's reception room in Cambridge, UK). Velocity is stationary relative to the chart (`0, 0, 0 m/s`), attitude is an identity quaternion (`0, 0, 0, 1`, unmeasured for this KAT), and the entire state is sealed with a cryptographic fingerprint (`9f6cc109...`) that fails verification if any bit of the prefix is corrupted."*
 
 #### Field-by-Field Breakdown
 
@@ -40,7 +40,7 @@ Reading this canonical address from left to right translates directly into physi
 |---|---|---|
 | **Protocol Tag** | `AEA` | Declares this as an **Abrams Event Address** record. |
 | **Central Body** | `399` | **NASA/NAIF Body ID 399 = Earth's center of mass.** (If this event occurred on Mars, it would be `499`; Moon is `301`; `0` = None / no central body). |
-| **Time Scale** | `TAI` | **International Atomic Time.** Unlike civil clocks (UTC), atomic time is monotonic and continuous—it never pauses or skips backwards for leap seconds. |
+| **Time Scale** | `TAI` | **International Atomic Time.** Unlike civil clocks (UTC), atomic time is monotonic and continuous: it never pauses or skips backwards for leap seconds. |
 | **Atomic Timestamp** | `1246190426.0` | **Integer TAI seconds elapsed** for 2009-06-28 12:00:00 UTC under the ICD conversion rule (POSIX + (TAI−UTC) − 8). |
 | **Reference Chart** | `ITRF2020` | **The coordinate map used.** Declares that the $(X,Y,Z)$ numbers below belong to the International Terrestrial Reference Frame 2020 (an Earth-fixed grid rotating with the planet). |
 | **3D Position** | `3916909.52..., 8057.75..., 5016918.65...` | **Cartesian $X, Y, Z$ coordinates in meters** from the center of the Earth. Converting this to surface coordinates gives **$52.205878^\circ\text{ N}, 0.117867^\circ\text{ E}$** at $56.0\text{ m}$ elevation (the University of Cambridge reception room). |
