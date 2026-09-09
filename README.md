@@ -1,5 +1,7 @@
 # Abrams Event Address (AEA)
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Spacetime_Inspector-2ea44f.svg?style=for-the-badge&logo=googlechrome)](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)
+
 [![Standard: AEA-STATE/1](https://img.shields.io/badge/Wire%20Standard-AEA--STATE%2F1%20(136%20B)-0284c7.svg)](#2-the-wire-reality-aea-state1-136-bytes)
 [![C-ABI](https://img.shields.io/badge/C--ABI-Naturally%20Aligned%20(136%20B)-10b981.svg)](include/aea.h)
 [![Rust: no_std](https://img.shields.io/badge/Rust-%23!%5Bno__std%5D-orange.svg)](src/lib.rs)
@@ -8,6 +10,8 @@
 [![CI](https://img.shields.io/badge/CI-Passing-238636.svg)](#)
 
 **A deterministic 4D spacetime event addressing protocol and zero-heap `#![no_std]` integrity sealer for autonomous systems, flight blackboxes, and cross-domain state continuity.**
+
+**[▶ Open Live Spacetime Inspector & Physics Lab](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)**: Interactive browser tool that decodes 4D coordinates, runs Bowring ellipsoid geodesy, visualizes the 136-byte memory wire map, and simulates cosmic-ray bit flips live via WebCrypto.
 
 ---
 
@@ -53,6 +57,8 @@ Reading this canonical address from left to right translates directly into physi
 python tools/aea.py verify tests/kat/cambridge.bin
 # Output: OK: SHA-256 integrity seal verified (9f6cc1096562729a902167fd622e66a264a239f3e9a9d804414659e3ab97800e).
 ```
+
+> **No Python installed?** Test this exact record live in your browser using the **[AEA Spacetime Inspector](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)**: decodes the kinematics, computes the Bowring WGS 84 geodesy inverse, and recalculates the SHA-256 seal client-side using the W3C WebCrypto API.
 
 ---
 
