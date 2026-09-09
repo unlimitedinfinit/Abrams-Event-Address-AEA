@@ -1,0 +1,25 @@
+[package]
+name = "aea"
+version = "1.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+description = "Zero-heap, #![no_std] Abrams Event Address state labeler (C ABI)"
+
+[lib]
+name = "aea"
+path = "src/lib.rs"
+crate-type = ["rlib", "staticlib"]
+
+[dependencies]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+debug = false
+strip = "symbols"
+
+[profile.dev]
+panic = "abort"

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEA-STATE/1 Binary Record Inspector</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-bright: #f0f6fc;
+    --accent: #58a6ff;
+    --green: #238636;
+    --green-bg: #0e2a18;
+    --red: #da3633;
+    --red-bg: #3c1214;
+    --code-bg: #090c10;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .container {
+    max-width: 820px;
+    width: 100%;
+  }
+  header {
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  h1 {
+    color: var(--text-bright);
+    font-size: 26px;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+  }
+  .sub {
+    color: #8b949e;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background-color: #1b222c;
+  }
+  .drop-zone p {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: var(--text-bright);
+    font-weight: 600;
+  }
+  .drop-zone span {
+    font-size: 12px;
+    color: #8b949e;
+  }
+  input[type="file"] {
+    display: none;
+  }
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .btn {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #21262d;
+    color: var(--text-bright);
+    transition: all 0.15s ease;
+  }
+  .btn:hover {
+    background: #30363d;
+    border-color: #8b949e;
+  }
+  .badge-card {
+    display: none;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+  }
+  .badge-card.valid {
+    display: flex;
+    background: var(--green-bg);
+    border-color: var(--green);
+    color: #3fb950;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .badge-card.invalid {
+    display: flex;
+    background: var(--red-bg);
+    border-color: var(--red);
+    color: #f85149;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .badge-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .data-card {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: #13171f;
+    color: #8b949e;
+    font-weight: 600;
+    width: 28%;
+  }
+  td {
+    color: var(--text-bright);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    word-break: break-all;
+  }
+  tr:last-child th, tr:last-child td {
+    border-bottom: none;
+  }
+  .hash-cell {
+    color: #a5d6ff;
+    font-weight: 600;
+  }
+  a.map-link {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  footer {
+    margin-top: 36px;
+    font-size: 12px;
+    color: #484f58;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>AEA-STATE/1 Binary Record Inspector</h1>
+    <div class="sub">Zero-Network Client-Side Spacetime State Decoding &amp; Cryptographic Verification (W3C Web Crypto API)</div>
+  </header>
+
+  <div class="drop-zone" id="dropZone">
+    <p>Drag and drop a 136-byte <code>.bin</code> record here, or click to browse</p>
+    <span>Accepts canonical test records, flight blackbox dumps, or logger extracts</span>
+    <input type="file" id="fileInput">
+  </div>
+
+  <div class="btn-group">
+    <button class="btn" onclick="loadCambridgeKat()">⚡ Load Cambridge 2009 Test Vector</button>
+  </div>
+
+  <div class="badge-card" id="badgeCard">
+    <div>
+      <div class="badge-title" id="badgeTitle">✓ SEAL VERIFIED</div>
+      <div id="badgeSubtitle" style="font-size: 13px; margin-top: 4px; opacity: 0.9;"></div>
+    </div>
+  </div>
+
+  <div class="data-card" id="dataCard">
+    <table>
+      <tr><th>Wire Format Version</th><td id="f_version">-</td></tr>
+      <tr><th>Central Body NAIF ID</th><td id="f_body">-</td></tr>
+      <tr><th>Coordinate Timestamp</th><td id="f_time">-</td></tr>
+      <tr><th>Coordinate Frame</th><td id="f_frame">-</td></tr>
+      <tr><th>Position [X, Y, Z] (m)</th><td id="f_pos">-</td></tr>
+      <tr><th>Velocity [Vx, Vy, Vz] (m/s)</th><td id="f_vel">-</td></tr>
+      <tr><th>Attitude Quaternion [XYZW]</th><td id="f_quat">-</td></tr>
+      <tr id="row_geodetic" style="display:none;"><th>WGS 84 Ellipsoid Inverse</th><td id="f_geodetic">-</td></tr>
+      <tr><th>Stored SHA-256 Trailer</th><td id="f_hash" class="hash-cell">-</td></tr>
+      <tr><th>Computed SHA-256 Digest</th><td id="f_computed" class="hash-cell">-</td></tr>
+    </table>
+  </div>
+
+  <footer>
+    Abrams Event Address · Standard AEA-STATE/1 (136 bytes) · Pure Client-Side Execution
+  </footer>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const badgeCard = document.getElementById('badgeCard');
+const badgeTitle = document.getElementById('badgeTitle');
+const badgeSubtitle = document.getElementById('badgeSubtitle');
+const dataCard = document.getElementById('dataCard');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) handleFile(e.target.files[0]);
+});
+
+// Base64 Cambridge 2009 Test Vector
+const CAMBRIDGE_B64 = "AQAAAI8BAABaW0dKAAAAAAAAAAABAAEAq8H6wjbiTUHHdLnQv3m/QMdIfKlVI1NBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8D+fbMEJZWJympAhZ/1iLmaiZKI58+mp2ARBRlnjq5eADg==";
+
+function b64ToBuffer(b64) {
+  const binaryString = window.atob(b64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+function loadCambridgeKat() {
+  parseBuffer(b64ToBuffer(CAMBRIDGE_B64), "cambridge.bin (Known-Answer Test)");
+}
+
+const FRAME_NAMES = {
+  0: "INVALID (0)",
+  1: "ITRF2020 (Earth-fixed)",
+  2: "GCRS (Geocentric Celestial)",
+  3: "BCRS (Barycentric Celestial)",
+  4: "BODY (Body-fixed)"
+};
+
+const TIME_SCALES = {
+  0: "INVALID (0)",
+  1: "TAI (International Atomic Time)",
+  2: "TT (Terrestrial Time)",
+  3: "TCB (Barycentric Coordinate Time)",
+  4: "TDB (Barycentric Dynamical Time)"
+};
+
+function canonF64(x) {
+  return (x === 0.0) ? 0.0 : x;
+}
+
+function ecefToWgs84(x, y, z) {
+  const a = 6378137.0;
+  const f = 1.0 / 298.257223563;
+  const b = a * (1.0 - f);
+  const e2 = (a*a - b*b) / (a*a);
+  const ep2 = (a*a - b*b) / (b*b);
+
+  const p = Math.hypot(x, y);
+  if (p < 1e-6) {
+    const lat = z > 0 ? 90.0 : -90.0;
+    return { lat, lon: 0.0, h: Math.abs(z) - b };
+  }
+  const theta = Math.atan2(z * a, p * b);
+  const lat = Math.atan2(
+    z + ep2 * b * Math.pow(Math.sin(theta), 3),
+    p - e2 * a * Math.pow(Math.cos(theta), 3)
+  );
+  const lon = Math.atan2(y, x);
+  const N = a / Math.sqrt(1.0 - e2 * Math.pow(Math.sin(lat), 2));
+  const h = p / Math.cos(lat) - N;
+
+  return {
+    lat: lat * (180.0 / Math.PI),
+    lon: lon * (180.0 / Math.PI),
+    h: h
+  };
+}
+
+async function handleFile(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  parseBuffer(arrayBuffer, file.name);
+}
+
+async function parseBuffer(arrayBuffer, sourceName) {
+  if (arrayBuffer.byteLength !== 136) {
+    alert(`File is ${arrayBuffer.byteLength} bytes. AEA-STATE/1 records must be exactly 136 bytes.`);
+    return;
+  }
+
+  const view = new DataView(arrayBuffer);
+  const v = view.getUint32(0, true);
+  const body = view.getUint32(4, true);
+  const timeSec = view.getBigInt64(8, true);
+  const timeNsec = view.getUint32(16, true);
+  const frame = view.getUint16(20, true);
+  const timeScale = view.getUint16(22, true);
+
+  const pos = [view.getFloat64(24, true), view.getFloat64(32, true), view.getFloat64(40, true)];
+  const vel = [view.getFloat64(48, true), view.getFloat64(56, true), view.getFloat64(64, true)];
+  const quat = [view.getFloat64(72, true), view.getFloat64(80, true), view.getFloat64(88, true), view.getFloat64(96, true)];
+
+  const storedBytes = new Uint8Array(arrayBuffer, 104, 32);
+  let storedHex = "";
+  for (let i = 0; i < 32; i++) storedHex += storedBytes[i].toString(16).padStart(2, '0');
+
+  const prefixBuf = new ArrayBuffer(104);
+  const prefixView = new DataView(prefixBuf);
+  prefixView.setUint32(0, v, true);
+  prefixView.setUint32(4, body, true);
+  prefixView.setBigInt64(8, timeSec, true);
+  prefixView.setUint32(16, timeNsec, true);
+  prefixView.setUint16(20, frame, true);
+  prefixView.setUint16(22, timeScale, true);
+
+  for (let i = 0; i < 3; i++) prefixView.setFloat64(24 + i*8, canonF64(pos[i]), true);
+  for (let i = 0; i < 3; i++) prefixView.setFloat64(48 + i*8, canonF64(vel[i]), true);
+  for (let i = 0; i < 4; i++) prefixView.setFloat64(72 + i*8, canonF64(quat[i]), true);
+
+  const hashBuffer = await window.crypto.subtle.digest("SHA-256", prefixBuf);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const computedHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const isValid = (storedHex === computedHex);
+
+  badgeCard.className = `badge-card ${isValid ? 'valid' : 'invalid'}`;
+  badgeTitle.textContent = isValid ? `✓ SEAL VERIFIED [${sourceName}]` : `✗ INTEGRITY MISMATCH [${sourceName}]`;
+  badgeSubtitle.textContent = isValid ? "SHA-256 trailer matches canonical 104-byte Little-Endian prefix." : "Computed SHA-256 does not match stored trailer (corrupted or tampered).";
+
+  document.getElementById('f_version').textContent = `${v} (AEA-STATE/1)`;
+  document.getElementById('f_body').textContent = `${body} (${body === 399 ? 'Earth geocenter' : 'NAIF Body'})`;
+  document.getElementById('f_time').textContent = `${timeSec}.${String(timeNsec).padStart(9, '0')} sec (${TIME_SCALES[timeScale] || timeScale})`;
+  document.getElementById('f_frame').textContent = `${FRAME_NAMES[frame] || frame}`;
+  document.getElementById('f_pos').textContent = `[${pos[0].toFixed(4)}, ${pos[1].toFixed(4)}, ${pos[2].toFixed(4)}]`;
+  document.getElementById('f_vel').textContent = `[${vel[0].toFixed(4)}, ${vel[1].toFixed(4)}, ${vel[2].toFixed(4)}]`;
+  document.getElementById('f_quat').textContent = `[${quat[0].toFixed(4)}, ${quat[1].toFixed(4)}, ${quat[2].toFixed(4)}, ${quat[3].toFixed(4)}]`;
+
+  const rowGeo = document.getElementById('row_geodetic');
+  if (frame === 1 && body === 399) {
+    const geo = ecefToWgs84(pos[0], pos[1], pos[2]);
+    const fGeo = document.getElementById('f_geodetic');
+    fGeo.innerHTML = `${geo.lat.toFixed(6)}° N, ${geo.lon.toFixed(6)}° E (Height: ${geo.h.toFixed(2)} m) &nbsp;·&nbsp; ` +
+      `<a class="map-link" target="_blank" href="https://www.openstreetmap.org/?mlat=${geo.lat.toFixed(6)}&mlon=${geo.lon.toFixed(6)}#map=16/${geo.lat.toFixed(6)}/${geo.lon.toFixed(6)}">View on Map ↗</a><br>` +
+      `<span style="color:#8b949e; font-size:11px;">WGS 84 ellipsoid inverse, tagged ITRF2020 for test vector.</span>`;
+    rowGeo.style.display = "";
+  } else {
+    rowGeo.style.display = "none";
+  }
+
+  document.getElementById('f_hash').textContent = storedHex;
+  document.getElementById('f_computed').textContent = computedHex;
+
+  dataCard.style.display = "block";
+}
+</script>
+</body>
+</html>

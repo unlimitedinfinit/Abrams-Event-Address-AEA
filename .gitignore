@@ -1,0 +1,20 @@
+# Abrams Event Address (AEA) — Public Repo .gitignore
+target/
+**/target/
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+*.pdb
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
+.idea/
+.vscode/
+*.log
+*.tmp

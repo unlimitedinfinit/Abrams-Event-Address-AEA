@@ -1,0 +1,18 @@
+{
+  "description": "Stephen Hawking Time-Traveler Reception (Cambridge, UK)",
+  "geodetic_qualification": "Inputs: WGS 84 (52.205878 N, 0.117867 E, h=56.0 m) -> ECEF Cartesian metres; tagged frame=ITRF2020 for the test. Not an official IERS ITRF2020 station coordinate.",
+  "civil_timestamp": "2009-06-28T12:00:00Z",
+  "fields": {
+    "version": 1,
+    "body_naif": 399,
+    "time_sec": 1246190426,
+    "time_nsec": 0,
+    "frame": 1,
+    "time_scale": 1,
+    "pos_m": [3916909.5232774816, 8057.749278632174, 5016918.648210711],
+    "vel_mps": [0.0, 0.0, 0.0],
+    "quat_xyzw": [0.0, 0.0, 0.0, 1.0]
+  },
+  "canonical_string": "AEA:399:TAI:1246190426.0:ITRF2020:3916909.5232774816,8057.749278632174,5016918.648210711:0,0,0:0,0,0,1:9f6cc1096562729a902167fd622e66a264a239f3e9a9d804414659e3ab97800e",
+  "sha256": "9f6cc1096562729a902167fd622e66a264a239f3e9a9d804414659e3ab97800e"
+}

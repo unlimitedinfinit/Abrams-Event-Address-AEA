@@ -1,0 +1,10 @@
+AEA-CORE
+Copyright (c) 2026 Joshua Abrams
+
+This product includes software developed for the Abrams Event Address (AEA) project.
+
+Cryptographic Component:
+- The SHA-256 implementation located in `src/sha256.rs` is an original, self-contained,
+  zero-allocation cleanroom implementation of NIST FIPS 180-4 (Secure Hash Standard).
+- It does NOT depend on the external `sha2` crate or any third-party cryptography libraries.
+- Provenance details are documented in `third_party/sha256/ORIGIN.txt`.
