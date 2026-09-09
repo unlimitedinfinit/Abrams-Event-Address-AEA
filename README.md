@@ -1,17 +1,14 @@
 # Abrams Event Address (AEA)
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Spacetime_Inspector-2ea44f.svg?style=for-the-badge&logo=googlechrome)](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)
-
 [![Standard: AEA-STATE/1](https://img.shields.io/badge/Wire%20Standard-AEA--STATE%2F1%20(136%20B)-0284c7.svg)](#2-the-wire-reality-aea-state1-136-bytes)
 [![C-ABI](https://img.shields.io/badge/C--ABI-Naturally%20Aligned%20(136%20B)-10b981.svg)](include/aea.h)
 [![Rust: no_std](https://img.shields.io/badge/Rust-%23!%5Bno__std%5D-orange.svg)](src/lib.rs)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20%2F%20Apache--2.0-blue.svg)](LICENSE)
 [![Verification: SHA-256 KAT](https://img.shields.io/badge/KAT%20Seal-Passed%20(9f6cc109...)-success.svg)](tests/kat/cambridge_v1.json)
 [![CI](https://img.shields.io/badge/CI-Passing-238636.svg)](#)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Web%20Inspector-2ea44f.svg)](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)
 
 **A deterministic 4D spacetime event addressing protocol and zero-heap `#![no_std]` integrity sealer for autonomous systems, flight blackboxes, and cross-domain state continuity.**
-
-**[▶ Open Live Spacetime Inspector & Physics Lab](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)**: Interactive browser tool that decodes 4D coordinates, runs Bowring ellipsoid geodesy, visualizes the 136-byte memory wire map, and simulates cosmic-ray bit flips live via WebCrypto.
 
 ---
 
@@ -134,10 +131,10 @@ python tools/aea.py decode tests/kat/cambridge.bin
 python tools/aea.py json tests/kat/cambridge.bin
 ```
 
-### Option B: In-Browser Offline Inspector
-Open `tools/inspector.html` in any modern web browser (Chrome, Firefox, Safari, Edge).  
-Drag and drop `tests/kat/cambridge.bin` or click **"⚡ Load Cambridge 2009 Test Vector"**.  
-*Runs 100% client-side via the W3C Web Crypto API with zero network calls.*
+### Option B: In-Browser Live Inspector & Physics Lab
+**[▶ Open Live Spacetime Inspector & Physics Lab](https://unlimitedinfinit.github.io/Abrams-Event-Address-AEA/tools/inspector.html)**: Interactive browser tool that decodes 4D coordinates, runs Bowring ellipsoid geodesy, visualizes the 136-byte memory wire map, and simulates cosmic-ray bit flips live via WebCrypto.
+
+Auto-loads the canonical Cambridge 2009 record on start, provides one-click presets (Cambridge, Apollo 11, ISS), and allows inspecting custom `.bin` records with zero install. Runs 100% client-side via the W3C WebCrypto API with zero network calls.
 
 ### Option C: Build and Test the Rust Flight Core
 ```bash
