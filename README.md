@@ -6,7 +6,15 @@
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20%2F%20Apache--2.0-blue.svg)](LICENSE)
 [![Verification: SHA-256 KAT](https://img.shields.io/badge/KAT%20Seal-Passed%20(9f6cc109...)-success.svg)](tests/kat/cambridge_v1.json)
 
-**A deterministic 4D spacetime event addressing protocol and zero-heap `no_std` integrity sealer for autonomous systems, flight blackboxes, and cross-domain state continuity.**
+**A deterministic 4D spacetime event addressing protocol and zero-heap `#![no_std]` integrity sealer for autonomous systems, flight blackboxes, and cross-domain state continuity.**
+
+---
+
+The **Abrams Event Address (AEA)** is a deterministic 4D spacetime coordinate standard and a 136-byte integrity-checked record for physical events. Rooted in relativistic astrometry and cryptographic verification, AEA replaces ambiguous, isolated conventions with explicit 4D event indexing across terrestrial, cislunar, and interplanetary frames.
+
+While conventional navigation outputs locate an object only on a local chart at a single civil second, physical events exist in 4D spacetime. AEA-STATE/1 binds the governing physics directly to the telemetry: declaring the central gravitating body (NAIF ID), the astrometric reference chart (ITRF2020, GCRS, BCRS), continuous atomic time (TAI, TT, TDB), Cartesian kinematics, attitude quaternion, and a 32-byte SHA-256 integrity digest over the canonical prefix.
+
+In communication-denied multi-agent operations or multi-decade archival logs, two platforms often hold state numbers that cannot be correlated because implicit frame or clock conventions were lost. AEA-STATE/1 binds the tags directly to the data so a consumer never has to guess the chart or time scale. It does not replace GPS, ITRF, GCRS, ROS 2 odometry, or CCSDS OEM; it is the zero-heap, single-epoch binary companion they emit. It does not navigate or propagate trajectories; it ensures that once state is estimated, where and when that event occurred remains mathematically unambiguous, verifiable, and permanent.
 
 ---
 
@@ -27,35 +35,18 @@ AEA:399:TAI:1246190426.0:ITRF2020:3916909.5232774816,8057.749278632174,5016918.6
 
 ---
 
-## 1. The Architecture of a Spacetime Address: The Foundational Philosophy
+## 1. Spacetime Addressing: Four Foundational Principles
 
-### The Epistemological Problem: Coordinates Without Context Are Meaningless
-In Newtonian mechanics, space is modeled as a static 3D stage and time as a universal background clock. Modern engineering largely inherits this convention: a drone emits `(x, y, z)` in a local NED frame, a vehicle logs `(lat, lon)` in WGS 84 with civil GPS time, and a satellite reports orbital state in GCRS with UTC.
-
-In relativistic spacetime, **there are no privileged coordinates, and there is no universal clock.** A physical event does not possess intrinsic numbers; it only has coordinates under an explicitly declared **differential chart** (reference frame) evaluated along an explicitly declared **parameter** (time scale).
-
-When multi-agent systems decouple, when radio links are jammed, or when telemetry must be archived across decades (the "2040 Student Scenario"), conventional coordinate tuples disintegrate:
-* **Frame Ambiguity:** A Cartesian coordinate $(X, Y, Z)$ without an explicit frame tag cannot distinguish between an Earth-fixed rotating crust (ITRF), an inertial geocentric sphere (GCRS), or a solar system barycentric origin (BCRS).
-* **Temporal Discontinuity:** Civil time scales (UTC) insert discontinuous leap seconds, introducing arithmetic errors across epoch differences. High-integrity mission kinematics require monotonic, continuous atomic time (TAI).
-* **Epoch & Plate Drift:** Terrestrial coordinates in ITRF are valid strictly at the event epoch. Comparing coordinates across multi-year baselines requires the caller to apply a Plate Motion Model (PMM).
-* **Silent Data Corruption:** Flight logs stored in non-volatile memory are vulnerable to single-event upsets (SEUs) and bit-flips from cosmic radiation. A corrupted floating-point bit turns a valid trajectory into a lethal error with zero notification.
-
-### Addresses Precede Transportation
-In computer networking, before you can route a packet, establish a socket, or build a distributed operating system, **you must establish an addressing scheme**. You cannot build the Internet without IP; you cannot manage memory without pointers.
-
-The **Abrams Event Address (AEA)** formalizes this principle for physical systems: **addresses precede transportation**.
-
-Before autonomous platforms can execute decentralized rendezvous, reconstruct blackbox accident forensics, or hand off state across multi-domain vacuum-to-aero boundaries, they must share an invariant, mathematically unambiguous definition of an **Event**:
-
-$$\text{Event} \equiv \Big( \text{Central Body}, \text{Chart/Frame}, \text{Time Scale}, \tau_{\text{epoch}}, \mathbf{r}, \mathbf{v}, \mathbf{q}, \mathcal{H}_{\text{seal}} \Big)$$
-
-AEA elevates this from an abstract mathematical concept into a concrete, 136-byte primitive that runs directly on bare-metal microcontroller silicon.
+1. **Explicit Coordinate Charts (No Frame Ambiguity):** A Cartesian coordinate $(X, Y, Z)$ without a reference chart tag cannot distinguish between an Earth-fixed rotating crust (ITRF2020), an inertial geocentric sphere (GCRS), or a solar system barycentric origin (BCRS). AEA requires declaring the reference chart.
+2. **Monotonic Atomic Time (No Leap-Second Arithmetic):** Civil time scales (UTC) insert discontinuous leap seconds, introducing arithmetic errors across epoch differences. High-integrity mission kinematics require continuous atomic time (TAI) or coordinate time (TT, TDB) measured from 1970-01-01T00:00:00 on the declared time scale.
+3. **Event-Epoch Geodesy (Plate Motion):** Terrestrial coordinates in ITRF are valid strictly at the event epoch. Comparing coordinates across multi-year baselines requires the caller to apply a Plate Motion Model (PMM).
+4. **Cryptographic Integrity Sealing:** Flight logs stored in non-volatile memory are vulnerable to single-event upsets (SEUs) and bit-flips from cosmic radiation. The SHA-256 trailer computed across the canonical Little-Endian prefix immediately detects bit-rot, memory corruption, or packet truncation without requiring a network connection or external PKI.
 
 ---
 
 ## 2. The Wire Reality: AEA-STATE/1 (136 Bytes)
 
-To serve flight computers, microcontrollers, and radiation-hardened space hardware, the theoretical 4D address is implemented as an **unpacked, naturally aligned 136-byte C-ABI structure**:
+To serve flight computers, microcontrollers, and radiation-hardened space hardware, the 4D address is implemented as an **unpacked, naturally aligned 136-byte C-ABI structure**:
 
 ```
 +----------------------------------------------------------------------------+
@@ -83,7 +74,7 @@ The `AeaRecord` structure occupies exactly 136 bytes in memory (offsets `[0, 104
 |:---:|:---:|:---|---|---|
 | `0` | 4 | `uint32_t` | `version` | Wire format version (`1` for `AEA-STATE/1`). |
 | `4` | 4 | `uint32_t` | `body_naif` | NAIF body identifier (`399` = Earth geocenter, `499` = Mars, `0` = none). |
-| `8` | 8 | `int64_t` | `time_sec` | Continuous integer seconds elapsed since epoch (1970-01-01T00:00:00). |
+| `8` | 8 | `int64_t` | `time_sec` | Continuous integer seconds elapsed since 1970-01-01T00:00:00 on the declared `time_scale`. |
 | `16` | 4 | `uint32_t` | `time_nsec` | Fractional nanoseconds ($0 \le \text{nsec} \le 999,999,999$). |
 | `20` | 2 | `uint16_t` | `frame` | Reference frame enum (`1` = ITRF2020, `2` = GCRS, `3` = BCRS, `4` = BODY). |
 | `22` | 2 | `uint16_t` | `time_scale` | Time scale enum (`1` = TAI atomic time, `2` = TT, `3` = TCB, `4` = TDB). |
@@ -143,7 +134,7 @@ To maintain rigorous aerospace engineering integrity, the boundaries of `aea` ar
 
 * **What it IS:** A single-epoch denied-link state sealer, flight blackbox serialization schema, and FAIR archival standard.
 * **What it is NOT:** It is **not** a navigation filter (Kalman filter / EKF), **not** an orbital propagator, **not** a fluid dynamics solver, and **not** a new theory of gravity.
-* **Companion Role:** It operates as the binary companion to ROS 2 odometry (`nav_msgs/Odometry`) and CCSDS Ephemeris Messages (OEM ISO 26900), providing an immutable, byte-stable record on microcontroller silicon when links drop.
+* **Companion Role:** It operates as the binary companion to ROS 2 odometry (`nav_msgs/Odometry`) and CCSDS Ephemeris Messages (OEM ISO 26900), providing an integrity-checked, byte-stable record on microcontroller silicon when links drop.
 
 > **Runtime Residue Note:** `libaea.a` contains only the minimal `core` and `compiler_builtins` object code emitted by `rustc`. There is no C standard library runtime, no Rust standard library, no unwinding runtime, no threads, and no dynamic heap allocation.
 
