@@ -1,46 +1,61 @@
 # Abrams Event Address (AEA)
 
-[![Standard: AEA-STATE/1](https://img.shields.io/badge/Wire%20Standard-AEA--STATE%2F1%20(136%20B)-0284c7.svg)](#3-wire-layout-specification)
-[![C-ABI](https://img.shields.io/badge/C--ABI-Zero--Heap%20%7C%20Zero--Alloc-10b981.svg)](include/aea.h)
+[![Standard: AEA-STATE/1](https://img.shields.io/badge/Wire%20Standard-AEA--STATE%2F1%20(136%20B)-0284c7.svg)](#2-the-wire-reality-aea-state1-136-bytes)
+[![C-ABI](https://img.shields.io/badge/C--ABI-Naturally%20Aligned%20(136%20B)-10b981.svg)](include/aea.h)
 [![Rust: no_std](https://img.shields.io/badge/Rust-%23!%5Bno__std%5D-orange.svg)](src/lib.rs)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20%2F%20Apache--2.0-blue.svg)](LICENSE)
 [![Verification: SHA-256 KAT](https://img.shields.io/badge/KAT%20Seal-Passed%20(9f6cc109...)-success.svg)](tests/kat/cambridge_v1.json)
 
-**A deterministic 4D spacetime coordinate standard and zero-heap `#![no_std]` integrity sealer for autonomous swarms, blackbox flight logs, and cross-domain state recovery.**
+**A deterministic 4D spacetime event addressing protocol and zero-heap `no_std` integrity sealer for autonomous systems, flight blackboxes, and cross-domain state continuity.**
 
 ---
 
-## 1. The 4D Coordinate System Framework: The Theory
+### The Canonical Event Address
 
-### Why Civil 3D Coordinates Fail Across Space and Time
+```text
+AEA:399:TAI:1246190426.0:ITRF2020:3916909.5232774816,8057.749278632174,5016918.648210711:0,0,0:0,0,0,1:9f6cc1096562729a902167fd622e66a264a239f3e9a9d804414659e3ab97800e
+```
 
-Modern navigation systems locate objects using local terrestrial conventions: GPS coordinates, latitude/longitude/altitude, or Earth-Centered, Earth-Fixed (ECEF) Cartesian vectors. A conventional coordinate like `52.2058° N, 0.1179° E` tells you where an antenna was situated on Earth's crust at a single moment in time.
-
-**In the physical universe, that point does not stand still:**
-* Earth rotates on its axis at approximately $1{,}600\text{ km/h}$.
-* Earth orbits the Solar System Barycenter at $107{,}000\text{ km/h}$ ($\\sim 30\text{ km/s}$).
-* The Solar System hurtles through the Milky Way at $828{,}000\text{ km/h}$ ($\\sim 230\text{ km/s}$).
-* Continental tectonic plates drift continuously (Eurasia moves $\\sim 2.21\text{ cm/year}$, shifting over $68\text{ cm}$ in three decades).
-
-One million years from now—or across interplanetary baselines—a static 3D GPS coordinate points to empty interstellar vacuum. To correlate events across autonomous vehicles, planetary probes, satellite swarms, or historical epochs, a spatial coordinate without an unambiguous temporal datum and reference chart is physically meaningless.
-
-### The Foundational Insight: Addresses Come Before Transportation
-
-In robotics, networking, and distributed systems, **addresses precede transportation**. You cannot route a packet without an IP address; you cannot dispatch a vehicle without a destination. 
-
-The **Abrams Event Address (AEA)** establishes an invariant 4D addressing layer that binds:
-1. **WHERE** an event occurred (Cartesian 3-space coordinates relative to a declared celestial or planetary origin).
-2. **WHEN** it occurred (continuous atomic time without leap-second discontinuities).
-3. **IN WHAT FRAME** it was observed (anchored to physical invariants: optical quasars in ICRF3, the Solar System Barycenter, or International Terrestrial Reference Frames).
-4. **INTEGRITY SEAL** (a deterministic cryptographic hash binding the state so corruption or tampering is instantly detectable).
-
-AEA does not replace operational navigation filters or orbital propagators—**it composes and anchors them into an immutable, byte-stable spacetime record**.
+> **Stephen Hawking Time-Traveler Reception** · Cambridge, UK · `2009-06-28 12:00 UTC`  
+> Input: WGS 84 ellipsoid ECEF, tagged `ITRF2020` for test vector. Not an official IERS station coordinate.  
+> 
+> **Verify in 5 seconds (Python standard library only):**
+> ```bash
+> python tools/aea.py verify tests/kat/cambridge.bin
+> # OK: SHA-256 integrity seal verified (9f6cc1096562729a902167fd622e66a264a239f3e9a9d804414659e3ab97800e).
+> ```
 
 ---
 
-## 2. The Flight Reality: AEA-STATE/1 (136 Bytes)
+## 1. The Architecture of a Spacetime Address: The Foundational Philosophy
 
-To serve flight computers, microcontrollers, and radiation-hardened space hardware, the theoretical 4D address is frozen into a compact, **136-byte packed C-ABI wire format**:
+### The Epistemological Problem: Coordinates Without Context Are Meaningless
+In Newtonian mechanics, space is modeled as a static 3D stage and time as a universal background clock. Modern engineering largely inherits this convention: a drone emits `(x, y, z)` in a local NED frame, a vehicle logs `(lat, lon)` in WGS 84 with civil GPS time, and a satellite reports orbital state in GCRS with UTC.
+
+In relativistic spacetime, **there are no privileged coordinates, and there is no universal clock.** A physical event does not possess intrinsic numbers; it only has coordinates under an explicitly declared **differential chart** (reference frame) evaluated along an explicitly declared **parameter** (time scale).
+
+When multi-agent systems decouple, when radio links are jammed, or when telemetry must be archived across decades (the "2040 Student Scenario"), conventional coordinate tuples disintegrate:
+* **Frame Ambiguity:** A Cartesian coordinate $(X, Y, Z)$ without an explicit frame tag cannot distinguish between an Earth-fixed rotating crust (ITRF), an inertial geocentric sphere (GCRS), or a solar system barycentric origin (BCRS).
+* **Temporal Discontinuity:** Civil time scales (UTC) insert discontinuous leap seconds, introducing arithmetic errors across epoch differences. High-integrity mission kinematics require monotonic, continuous atomic time (TAI).
+* **Epoch & Plate Drift:** Terrestrial coordinates in ITRF are valid strictly at the event epoch. Comparing coordinates across multi-year baselines requires the caller to apply a Plate Motion Model (PMM).
+* **Silent Data Corruption:** Flight logs stored in non-volatile memory are vulnerable to single-event upsets (SEUs) and bit-flips from cosmic radiation. A corrupted floating-point bit turns a valid trajectory into a lethal error with zero notification.
+
+### Addresses Precede Transportation
+In computer networking, before you can route a packet, establish a socket, or build a distributed operating system, **you must establish an addressing scheme**. You cannot build the Internet without IP; you cannot manage memory without pointers.
+
+The **Abrams Event Address (AEA)** formalizes this principle for physical systems: **addresses precede transportation**.
+
+Before autonomous platforms can execute decentralized rendezvous, reconstruct blackbox accident forensics, or hand off state across multi-domain vacuum-to-aero boundaries, they must share an invariant, mathematically unambiguous definition of an **Event**:
+
+$$\text{Event} \equiv \Big( \text{Central Body}, \text{Chart/Frame}, \text{Time Scale}, \tau_{\text{epoch}}, \mathbf{r}, \mathbf{v}, \mathbf{q}, \mathcal{H}_{\text{seal}} \Big)$$
+
+AEA elevates this from an abstract mathematical concept into a concrete, 136-byte primitive that runs directly on bare-metal microcontroller silicon.
+
+---
+
+## 2. The Wire Reality: AEA-STATE/1 (136 Bytes)
+
+To serve flight computers, microcontrollers, and radiation-hardened space hardware, the theoretical 4D address is implemented as an **unpacked, naturally aligned 136-byte C-ABI structure**:
 
 ```
 +----------------------------------------------------------------------------+
@@ -53,7 +68,7 @@ To serve flight computers, microcontrollers, and radiation-hardened space hardwa
 
 ### Architectural Properties
 * **Zero Heap (`#![no_std]`):** No `alloc`, no `malloc`, no heap allocations, no dynamic resizing. Safe for bare-metal bootloaders and flight loops.
-* **Natural 8-Byte Alignment:** Natural alignment prevents hardware bus faults on strict RISC processors (SPARC LEON, ARM Cortex-M) without packing directives.
+* **Natural 8-Byte Alignment:** Natural alignment prevents hardware bus faults on strict RISC processors (SPARC LEON, ARM Cortex-M) without packing directives (`repr(C)`, no `#pragma pack`).
 * **Deterministic Little-Endian Serialization:** Canonical serialization guarantees byte-for-byte identical SHA-256 digests across little-endian and big-endian platforms.
 * **Negative-Zero Canonicalization:** IEEE-754 `-0.0` is canonicalized to `+0.0` during hashing to eliminate floating-point sign ambiguity.
 * **Zero Dependencies:** Pure Rust core with a vendored, zero-dependency SHA-256 implementation. Zero external crates.
@@ -160,7 +175,7 @@ To maintain rigorous aerospace engineering integrity, the boundaries of `aea` ar
 │   ├── kat.rs                 # Known-Answer Test runner (Cambridge 2009)
 │   └── kat/
 │       ├── cambridge.bin      # 136-byte canonical test vector binary
-│       ├── cambridge.hash     # Expected SHA-256 hex string
+│       ├── cambridge.hash     # Expected SHA-256 hex string (9f6cc109...)
 │       └── cambridge_v1.json  # Annotated JSON vector with geodetic provenance
 │
 ├── tools/
