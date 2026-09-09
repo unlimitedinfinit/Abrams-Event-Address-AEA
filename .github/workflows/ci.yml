@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  verify:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv7em-none-eabihf
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Rust test suite
+        run: cargo test
+
+      - name: Cross-compile bare-metal static library (thumbv7em)
+        run: cargo build --target thumbv7em-none-eabihf --release
+
+      - name: Verify Cambridge KAT via Python CLI
+        run: python tools/aea.py verify tests/kat/cambridge.bin

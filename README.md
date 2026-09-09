@@ -5,6 +5,7 @@
 [![Rust: no_std](https://img.shields.io/badge/Rust-%23!%5Bno__std%5D-orange.svg)](src/lib.rs)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20%2F%20Apache--2.0-blue.svg)](LICENSE)
 [![Verification: SHA-256 KAT](https://img.shields.io/badge/KAT%20Seal-Passed%20(9f6cc109...)-success.svg)](tests/kat/cambridge_v1.json)
+[![CI](https://img.shields.io/badge/CI-Passing-238636.svg)](#)
 
 **A deterministic 4D spacetime event addressing protocol and zero-heap `#![no_std]` integrity sealer for autonomous systems, flight blackboxes, and cross-domain state continuity.**
 
@@ -31,20 +32,20 @@ AEA:399:TAI:1246190426.0:ITRF2020:3916909.5232774816,8057.749278632174,5016918.6
 
 Reading this canonical address from left to right translates directly into physical reality:
 
-> *"This event took place on Earth (`399`), timed by continuous atomic clocks (`TAI`) exactly `1,246,190,426.0` seconds past the 1970 epoch (June 28, 2009 at 12:00:00 UTC). Position is measured in an Earth-fixed grid (`ITRF2020`) at Cartesian coordinates `[3916909.52m, 8057.75m, 5016918.65m]`—which converts on the surface to `52.205878° N, 0.117867° E` (Stephen Hawking's reception room in Cambridge, UK). The platform was stationary relative to the room (`0, 0, 0 m/s`), in standard upright orientation (`0, 0, 0, 1` quaternion), and the entire state is sealed with a cryptographic fingerprint (`9f6cc109...`) that fails if even a single millimeter or nanosecond is corrupted."*
+> *"This event took place on Earth (`399`), timed on continuous atomic time (`TAI`) at timestamp `1,246,190,426.0` (corresponding to 2009-06-28 12:00:00 UTC under the ICD conversion rule). Position is measured in an Earth-fixed grid (`ITRF2020`) at Cartesian coordinates `[3916909.52m, 8057.75m, 5016918.65m]`—which converts on the WGS 84 ellipsoid to `52.205878° N, 0.117867° E` (Stephen Hawking's reception room in Cambridge, UK). Velocity is stationary relative to the chart (`0, 0, 0 m/s`), attitude is an identity quaternion (`0, 0, 0, 1`, unmeasured for this KAT), and the entire state is sealed with a cryptographic fingerprint (`9f6cc109...`) that fails verification if any bit of the prefix is corrupted."*
 
 #### Field-by-Field Breakdown
 
 | Element in String | Value | What It Means in Plain English |
 |---|---|---|
 | **Protocol Tag** | `AEA` | Declares this as an **Abrams Event Address** record. |
-| **Central Body** | `399` | **NASA/NAIF Body ID 399 = Earth's center of mass.** (If this event occurred on Mars, it would be `499`; Moon is `301`; deep space is `0`). |
+| **Central Body** | `399` | **NASA/NAIF Body ID 399 = Earth's center of mass.** (If this event occurred on Mars, it would be `499`; Moon is `301`; `0` = None / no central body). |
 | **Time Scale** | `TAI` | **International Atomic Time.** Unlike civil clocks (UTC), atomic time is monotonic and continuous—it never pauses or skips backwards for leap seconds. |
-| **Atomic Timestamp** | `1246190426.0` | **Exact elapsed seconds.** Exactly $1{,}246{,}190{,}426.0$ seconds since `1970-01-01T00:00:00 TAI`. (Matches civil UTC `2009-06-28 12:00:00` + 34 accumulated leap seconds). |
+| **Atomic Timestamp** | `1246190426.0` | **Integer TAI seconds elapsed** for 2009-06-28 12:00:00 UTC under the ICD conversion rule (POSIX + (TAI−UTC) − 8). |
 | **Reference Chart** | `ITRF2020` | **The coordinate map used.** Declares that the $(X,Y,Z)$ numbers below belong to the International Terrestrial Reference Frame 2020 (an Earth-fixed grid rotating with the planet). |
 | **3D Position** | `3916909.52..., 8057.75..., 5016918.65...` | **Cartesian $X, Y, Z$ coordinates in meters** from the center of the Earth. Converting this to surface coordinates gives **$52.205878^\circ\text{ N}, 0.117867^\circ\text{ E}$** at $56.0\text{ m}$ elevation (the University of Cambridge reception room). |
 | **3D Velocity** | `0, 0, 0` | **$V_x, V_y, V_z$ in meters per second** relative to the chart. `0, 0, 0` means resting stationary on the floor. |
-| **Attitude Orientation** | `0, 0, 0, 1` | **Unit quaternion $[q_x, q_y, q_z, q_w]$.** Identity orientation (aligned with the chart axes; no roll, pitch, or yaw offset). |
+| **Attitude Orientation** | `0, 0, 0, 1` | **Unit quaternion $[q_x, q_y, q_z, q_w]$.** Identity quaternion (attitude unmeasured for this KAT; aligned with ITRF chart axes). |
 | **Integrity Seal** | `9f6cc109...` | **SHA-256 cryptographic digest** computed over the raw binary bytes of all preceding fields. If a cosmic ray bit-flip occurs in flash memory, or a coordinate is tampered by $1\text{ mm}$, this seal instantly fails verification. |
 
 ```bash
@@ -137,14 +138,15 @@ cargo test
 cargo build --target thumbv7em-none-eabihf --release
 ```
 
-### Option D: Standalone C Integration (No Rust Toolchain Needed)
-Existing C/C++ flight software can link `include/aea.h` directly:
+### Option D: Standalone C Integration
+Existing C/C++ flight software can consume `include/aea.h` directly. To link against the host static library built on your machine (`target/release/libaea.a`):
 ```bash
 cd examples/c_caller
 make run
 # Compiles main.c, seals the record, asserts byte-for-byte SHA-256 KAT match,
 # and verifies tamper detection (+1mm perturbation fails hash).
 ```
+> *Note: For target silicon, the prebuilt bare-metal ARM Cortex-M archive is provided as a GitHub Release asset.*
 
 ---
 
@@ -210,7 +212,7 @@ Issues are welcome for ICD specification discrepancies, byte-layout edge cases, 
 ## 8. License
 
 Dual-licensed under either:
-* **MIT License** ([LICENSE-MIT](LICENSE) or http://opensource.org/licenses/MIT)
-* **Apache License, Version 2.0** ([LICENSE-APACHE](LICENSE) or http://www.apache.org/licenses/LICENSE-2.0)
+* **MIT License** ([LICENSE](LICENSE) or http://opensource.org/licenses/MIT)
+* **Apache License, Version 2.0** ([LICENSE](LICENSE) or http://www.apache.org/licenses/LICENSE-2.0)
 
 at your option.
