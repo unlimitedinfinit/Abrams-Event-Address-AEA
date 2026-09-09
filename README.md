@@ -25,13 +25,33 @@ AEA:399:TAI:1246190426.0:ITRF2020:3916909.5232774816,8057.749278632174,5016918.6
 ```
 
 > **Stephen Hawking Time-Traveler Reception** · Cambridge, UK · `2009-06-28 12:00 UTC`  
-> Input: WGS 84 ellipsoid ECEF, tagged `ITRF2020` for test vector. Not an official IERS station coordinate.  
-> 
-> **Verify in 5 seconds (Python standard library only):**
-> ```bash
-> python tools/aea.py verify tests/kat/cambridge.bin
-> # OK: SHA-256 integrity seal verified (9f6cc1096562729a902167fd622e66a264a239f3e9a9d804414659e3ab97800e).
-> ```
+> Input: WGS 84 ellipsoid ECEF, tagged `ITRF2020` for test vector. Not an official IERS station coordinate.
+
+#### In Plain English: What This String Actually Tells You
+
+Reading this canonical address from left to right translates directly into physical reality:
+
+> *"This event took place on Earth (`399`), timed by continuous atomic clocks (`TAI`) exactly `1,246,190,426.0` seconds past the 1970 epoch (June 28, 2009 at 12:00:00 UTC). Position is measured in an Earth-fixed grid (`ITRF2020`) at Cartesian coordinates `[3916909.52m, 8057.75m, 5016918.65m]`—which converts on the surface to `52.205878° N, 0.117867° E` (Stephen Hawking's reception room in Cambridge, UK). The platform was stationary relative to the room (`0, 0, 0 m/s`), in standard upright orientation (`0, 0, 0, 1` quaternion), and the entire state is sealed with a cryptographic fingerprint (`9f6cc109...`) that fails if even a single millimeter or nanosecond is corrupted."*
+
+#### Field-by-Field Breakdown
+
+| Element in String | Value | What It Means in Plain English |
+|---|---|---|
+| **Protocol Tag** | `AEA` | Declares this as an **Abrams Event Address** record. |
+| **Central Body** | `399` | **NASA/NAIF Body ID 399 = Earth's center of mass.** (If this event occurred on Mars, it would be `499`; Moon is `301`; deep space is `0`). |
+| **Time Scale** | `TAI` | **International Atomic Time.** Unlike civil clocks (UTC), atomic time is monotonic and continuous—it never pauses or skips backwards for leap seconds. |
+| **Atomic Timestamp** | `1246190426.0` | **Exact elapsed seconds.** Exactly $1{,}246{,}190{,}426.0$ seconds since `1970-01-01T00:00:00 TAI`. (Matches civil UTC `2009-06-28 12:00:00` + 34 accumulated leap seconds). |
+| **Reference Chart** | `ITRF2020` | **The coordinate map used.** Declares that the $(X,Y,Z)$ numbers below belong to the International Terrestrial Reference Frame 2020 (an Earth-fixed grid rotating with the planet). |
+| **3D Position** | `3916909.52..., 8057.75..., 5016918.65...` | **Cartesian $X, Y, Z$ coordinates in meters** from the center of the Earth. Converting this to surface coordinates gives **$52.205878^\circ\text{ N}, 0.117867^\circ\text{ E}$** at $56.0\text{ m}$ elevation (the University of Cambridge reception room). |
+| **3D Velocity** | `0, 0, 0` | **$V_x, V_y, V_z$ in meters per second** relative to the chart. `0, 0, 0` means resting stationary on the floor. |
+| **Attitude Orientation** | `0, 0, 0, 1` | **Unit quaternion $[q_x, q_y, q_z, q_w]$.** Identity orientation (aligned with the chart axes; no roll, pitch, or yaw offset). |
+| **Integrity Seal** | `9f6cc109...` | **SHA-256 cryptographic digest** computed over the raw binary bytes of all preceding fields. If a cosmic ray bit-flip occurs in flash memory, or a coordinate is tampered by $1\text{ mm}$, this seal instantly fails verification. |
+
+```bash
+# Verify the seal yourself in 5 seconds (Python standard library only):
+python tools/aea.py verify tests/kat/cambridge.bin
+# Output: OK: SHA-256 integrity seal verified (9f6cc1096562729a902167fd622e66a264a239f3e9a9d804414659e3ab97800e).
+```
 
 ---
 
