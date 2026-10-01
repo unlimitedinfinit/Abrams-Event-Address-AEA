@@ -67,11 +67,6 @@ python tools/aea.py verify tests/kat/cambridge.bin
 2. **Monotonic Atomic Time (No Leap-Second Arithmetic):** Civil time scales (UTC) insert discontinuous leap seconds, introducing arithmetic errors across epoch differences. High-integrity mission kinematics require continuous atomic time (TAI) or coordinate time (TT, TDB) measured from 1970-01-01T00:00:00 on the declared time scale.
 3. **Event-Epoch Geodesy (Plate Motion):** Terrestrial coordinates in ITRF are valid strictly at the event epoch. Comparing coordinates across multi-year baselines requires the caller to apply a Plate Motion Model (PMM).
 4. **Cryptographic Integrity Sealing:** Flight logs stored in non-volatile memory are vulnerable to single-event upsets (SEUs) and bit-flips from cosmic radiation. The SHA-256 trailer computed across the canonical Little-Endian prefix immediately detects bit-rot, memory corruption, or packet truncation without requiring a network connection or external PKI.
-
-<p align="center">
-  <img src="docs/assets/4D.jfif" alt="4D Spacetime Event Addressing" width="100%">
-</p>
-
 ---
 
 ## 2. The Wire Reality: AEA-STATE/1 (136 Bytes)
