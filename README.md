@@ -5,7 +5,33 @@
 
 The CI badge above is GitHub's live workflow status, not a static image.
 
-**AEA-STATE/1 is a proposed 136-byte record format.** It tags an estimated state with a frame and a time scale, and protects the record with a SHA-256 integrity digest. The reference implementation is a zero-heap `#![no_std]` Rust library with a C ABI. Wire-format version 1.0 (reference implementation release v1.0.3, ABI version 1.0 via `aea_version() = 0x00010000`). Readiness is TRL 3: a host-verified proof of concept with no hardware or flight demonstration yet.
+## Abstract
+
+**How do you address an event in a moving four-dimensional universe?**
+
+In physics and systems engineering, an event is a physical occurrence or state at a specific point in three-dimensional space and one-dimensional time. While modern physics treats space and time as a single four-dimensional structure, navigation, tracking, and archival systems still rely on domain-specific coordinate conventions—terrestrial datums for Earth's surface, celestial frames for deep space, and independent clocks for time. Because everyday maps move with the Earth, locations appear static; in reality, Earth is rotating, orbiting the Sun at roughly 29.78 km/s (67,000 mph), and moving through the Milky Way at roughly 220–230 km/s. Once an event record leaves its local system, defining where it occurred requires explicitly locking down when it happened, on which time scale, on which celestial body, and relative to what reference frame.
+
+Stephen Hawking's 2009 reception for time travelers illustrates this problem: a street address, a calendar date, and a wall-clock time work on Earth's surface through shared human convention, but outside our moving terrestrial frame, those inputs are incomplete.
+
+The Abrams Event Address (AEA) does not claim new physics. It unifies seven existing physical and contextual declarations into one explicit coordinate standard: target celestial body, epoch, atomic time scale, coordinate reference frame, 3D spatial position, frame-relative velocity, and spatial orientation, sealed with a cryptographic integrity digest. The published AEA-STATE/1 specification encodes this single-epoch state into a deterministic 136-byte binary record built on established geodetic, astrometric, and metrological standards, enabling unambiguous event addressing and cross-system state correlation across terrestrial, orbital, and planetary domains.
+
+<p align="center">
+  <a href="docs/aea-whitepaper.pdf"><img src="https://img.shields.io/badge/White_Paper-PDF-b31b1b?style=for-the-badge&logo=adobeacrobatreader&logoColor=white" alt="White Paper (PDF)"></a>
+  &nbsp;&nbsp;
+  <a href="docs/aea-whitepaper.docx"><img src="https://img.shields.io/badge/White_Paper-DOCX-2b579a?style=for-the-badge&logo=microsoftword&logoColor=white" alt="White Paper (DOCX)"></a>
+</p>
+
+<p align="center">
+  <a href="https://doi.org/10.5281/zenodo.23970628"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.23970628-informational?style=for-the-badge&logo=doi&logoColor=white" alt="DOI 10.5281/zenodo.23970628"></a>
+</p>
+
+The company repository is [Abrams-Research-Systems-LLC/Abrams-Event-Address-AEA](https://github.com/Abrams-Research-Systems-LLC/Abrams-Event-Address-AEA).
+
+## Reference Implementation
+
+The remainder of this README documents the AEA-STATE/1 record format and the reference implementation in this repository.
+
+**AEA-STATE/1 is a proposed 136-byte record format.** It tags an estimated state with a frame and a time scale, and protects the record with a SHA-256 integrity digest. The reference implementation is a zero-heap `#![no_std]` Rust library with a C ABI. Wire-format version 1.0 (reference implementation release v1.0.3, ABI version 1.0 via `aea_version() = 0x00010000`).
 
 ## What it is
 - A fixed, naturally aligned, 136-byte binary record. Its contents are: body (NAIF ID), time (seconds and nanoseconds on a declared time scale), reference frame, position, velocity, and an attitude quaternion. A SHA-256 digest of the first 104 bytes follows.
@@ -63,7 +89,7 @@ These are open questions, not capabilities. We plan to investigate:
 - measured embedded cost on Cortex-M/R and LEON.
 
 ## Repository layout
-`src/` library · `include/aea.h` C header · `tests/` tests and KAT data · `tools/` Python reference decoder, KAT generator, and browser inspector · `fuzz/` cargo-fuzz targets · `examples/c_caller` · `docs/` ICD, scope, and auth draft.
+`src/` library · `include/aea.h` C header · `tests/` tests and KAT data · `tools/` Python reference decoder, KAT generator, and browser inspector · `fuzz/` cargo-fuzz targets · `examples/c_caller` · `docs/` ICD, scope, auth draft, and white paper.
 
 No prebuilt binaries are released at this time. Build from source as shown above.
 
